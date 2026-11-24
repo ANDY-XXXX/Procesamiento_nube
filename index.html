@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Procesamiento Paralelo en la Nube</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="CSS/style.css">
+</head>
+<body>
+<div id="viewport">
+<main id="stage" aria-live="polite">
+
+<!-- 1 · Portada -->
+<section class="slide cover" data-title="Procesamiento paralelo en la nube" data-section="Inicio" data-anim="cluster"
+  data-notes="Saluden y presenten al equipo. Idea para enganchar: cada vez que abren Netflix o piden un Uber, miles de computadoras trabajan al mismo tiempo para ustedes. De eso trata el tema.">
+  <canvas class="bg-canvas" aria-hidden="true"></canvas>
+  <div class="inner">
+    <div class="eyebrow a">Tema 7 · Arquitectura y Organización de Computadores 502-B</div>
+    <h1 class="mega a" style="--d:1">Procesamiento paralelo <span class="hl">en la nube</span></h1>
+    <p class="lead a" style="--d:2">Cómo miles de máquinas trabajan al mismo tiempo para resolver lo que una sola no podría.</p>
+    <div class="tags a" style="--d:3"><span>MapReduce</span><span>Apache Spark</span><span>Contenedores</span><span>Kubernetes</span><span>Autoescalamiento</span><span>Microservicios</span></div>
+  </div>
+</section>
+
+<!-- 2 · Sección MapReduce -->
+<section class="slide divider" data-title="MapReduce" data-section="01 · MapReduce"
+  data-notes="Primera sección. MapReduce es la idea base de todo lo demás: partir un problema enorme en pedazos que se resuelven al mismo tiempo.">
+  <div class="big-num a" aria-hidden="true">01</div>
+  <div class="eyebrow a" style="--d:1">Sección 1 de 4</div>
+  <h2 class="mega a" style="--d:2">MapReduce</h2>
+  <p class="lead a" style="--d:3">Divide el trabajo, procésalo en paralelo y junta el resultado.</p>
+</section>
+
+<!-- 3 · ¿Qué es MapReduce? -->
+<section class="slide" data-title="¿Qué es MapReduce?" data-section="01 · MapReduce"
+  data-notes="Google lo publicó en 2004 para procesar la web completa. Señalen el diagrama: un archivo de 1 TB se parte en bloques y cada nodo procesa el suyo al mismo tiempo. Al final se junta todo.">
+  <header class="head">
+    <div class="eyebrow a">01 · MapReduce</div>
+    <h2 class="h2 a" style="--d:1">¿Qué es MapReduce?</h2>
+  </header>
+  <div class="cols grow">
+    <div>
+      <p class="body a" style="--d:2">Un modelo de programación que Google publicó en 2004 para procesar enormes volúmenes de datos <span class="blue">en paralelo</span>, repartidos entre cientos de computadoras.</p>
+      <div class="facts">
+        <div class="fact a" style="--d:3"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg><span>Hadoop lo volvió de código abierto y lo llevó a cualquier empresa.</span></div>
+        <div class="fact a" style="--d:4"><svg class="ico" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></svg><span>Si un nodo falla, su tarea se repite en otro. Nadie lo nota.</span></div>
+        <div class="fact a" style="--d:5"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span>Escala horizontal: más datos, más máquinas.</span></div>
+      </div>
+    </div>
+    <div class="split a" style="--d:3" aria-label="Diagrama: un archivo se divide en 4 bloques que procesan 4 nodos en paralelo">
+      <div class="file"><span>ventas_2026.csv</span><b>1 TB</b></div>
+      <div class="fan"><div class="wire"></div><div class="wire"></div><div class="wire"></div><div class="wire"></div></div>
+      <div class="fan">
+        <div class="node"><div class="nm">Nodo 1</div><div class="sz">256 GB</div><div class="bar"><i style="--t:3.6s"></i></div></div>
+        <div class="node"><div class="nm">Nodo 2</div><div class="sz">256 GB</div><div class="bar"><i style="--t:4.4s"></i></div></div>
+        <div class="node"><div class="nm">Nodo 3</div><div class="sz">256 GB</div><div class="bar"><i style="--t:3.9s"></i></div></div>
+        <div class="node"><div class="nm">Nodo 4</div><div class="sz">256 GB</div><div class="bar"><i style="--t:4.8s"></i></div></div>
+      </div>
+      <div class="fan"><div class="wire"></div><div class="wire"></div><div class="wire"></div><div class="wire"></div></div>
+      <div class="result"><span>Resultado combinado</span><span>4 partes · al mismo tiempo</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · Fases -->
+<section class="slide" data-title="Sus 3 fases" data-section="01 · MapReduce"
+  data-notes="Avancen fase por fase con cada clic. Map: cada nodo trabaja su bloque. Shuffle: se agrupa por clave, es la parte que mueve datos por la red. Reduce: se combina. Remate: el programador solo escribe map y reduce.">
+  <header class="head">
+    <div class="eyebrow a">01 · MapReduce</div>
+    <h2 class="h2 a" style="--d:1">Sus 3 fases</h2>
+  </header>
+  <div class="phases grow">
+    <div class="phase card" data-step="1">
+      <div class="num">FASE 1</div>
+      <h3 class="h3">Map</h3>
+      <p class="body">Cada nodo procesa su bloque y genera pares <span class="mono amb">(clave, valor)</span>.</p>
+      <div class="sample">(nube, 1)</div>
+    </div>
+    <div class="flow" data-step="2"><i></i><i></i><i></i></div>
+    <div class="phase card" data-step="2">
+      <div class="num">FASE 2</div>
+      <h3 class="h3">Shuffle</h3>
+      <p class="body">Agrupa los pares por clave y los envía por la red al nodo que le toca.</p>
+      <div class="sample">nube → [1, 1]</div>
+    </div>
+    <div class="flow" data-step="3"><i></i><i></i><i></i></div>
+    <div class="phase card" data-step="3">
+      <div class="num">FASE 3</div>
+      <h3 class="h3">Reduce</h3>
+      <p class="body">Combina cada grupo en un resultado final.</p>
+      <div class="sample">(nube, 2)</div>
+    </div>
+  </div>
+  <div class="callout" data-step="4"><svg class="ico" viewBox="0 0 24 24"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"/></svg><span>El programador solo escribe dos funciones, <span class="mono amb">map()</span> y <span class="mono amb">reduce()</span>. El framework se encarga de repartir, ordenar y recuperarse de fallos.</span></div>
+</section>
+
+<!-- 5 · Ejemplo -->
+<section class="slide" data-title="Ejemplo: contar palabras" data-section="01 · MapReduce"
+  data-notes="Sigan los colores: azul es nube, ámbar es datos. Cada clic avanza una fase. El resultado: nube aparece 2 veces y datos 1. Con 1 TB de texto es exactamente igual, solo que con más nodos.">
+  <header class="head">
+    <div class="eyebrow a">01 · MapReduce · Ejemplo</div>
+    <h2 class="h2 a" style="--d:1">Contar palabras</h2>
+  </header>
+  <div class="wc grow">
+    <div class="wc-col a" style="--d:2">
+      <div class="k">Entrada</div>
+      <div class="input-line"><span class="n">nube</span> <span class="d">datos</span> <span class="n">nube</span></div>
+      <div class="grp"><span>Nodo A</span><div class="input-line"><span class="n">nube</span> <span class="d">datos</span></div></div>
+      <div class="grp"><span>Nodo B</span><div class="input-line"><span class="n">nube</span></div></div>
+    </div>
+    <div class="wc-col" data-step="1">
+      <div class="k">1 · Map</div>
+      <div class="grp"><span>Nodo A</span><div class="kv n">(nube, 1)</div><div class="kv d">(datos, 1)</div></div>
+      <div class="grp"><span>Nodo B</span><div class="kv n">(nube, 1)</div></div>
+    </div>
+    <div class="wc-col" data-step="2">
+      <div class="k">2 · Shuffle</div>
+      <div class="grp"><span>Clave nube</span><div class="kv n">nube → [1, 1]</div></div>
+      <div class="grp"><span>Clave datos</span><div class="kv d">datos → [1]</div></div>
+    </div>
+    <div class="wc-col" data-step="3">
+      <div class="k">3 · Reduce</div>
+      <div class="kv n big">nube = 2</div>
+      <div class="kv d big">datos = 1</div>
+      <p class="small" style="margin-top:auto">Con 1 TB de texto el proceso es igual: solo hay más bloques y más nodos.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · MapReduce en el mundo real -->
+<section class="slide" data-title="MapReduce en el mundo real" data-section="01 · MapReduce"
+  data-notes="Tres casos rápidos. Lo común: trabajos por lotes (batch) sobre datos gigantes, donde no importa esperar unos minutos.">
+  <header class="head">
+    <div class="eyebrow a">01 · MapReduce</div>
+    <h2 class="h2 a" style="--d:1">En el mundo real</h2>
+  </header>
+  <div class="cases grow">
+    <div class="case card" data-step="1">
+      <div class="tag">Buscador</div>
+      <h3 class="h3">Google</h3>
+      <p class="body">Indexar millones de páginas web para que el buscador responda en milisegundos.</p>
+      <div class="use"><span>índices</span><span>batch</span></div>
+    </div>
+    <div class="case card" data-step="2">
+      <div class="tag">Redes sociales</div>
+      <h3 class="h3">Yahoo y Facebook</h3>
+      <p class="body">Analizar registros (logs) de millones de usuarios con Hadoop.</p>
+      <div class="use"><span>logs</span><span>Hadoop</span></div>
+    </div>
+    <div class="case card" data-step="3">
+      <div class="tag">Negocios</div>
+      <h3 class="h3">Bancos y tiendas</h3>
+      <p class="body">Reportes nocturnos por lotes: ventas del día, cierres y conciliaciones.</p>
+      <div class="use"><span>reportes</span><span>nocturno</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · Sección Spark -->
+<section class="slide divider" data-title="Apache Spark" data-section="02 · Apache Spark"
+  data-notes="Spark es el sucesor natural de MapReduce. La diferencia clave es la memoria.">
+  <div class="big-num a" aria-hidden="true">02</div>
+  <div class="eyebrow a" style="--d:1">Sección 2 de 4</div>
+  <h2 class="mega a" style="--d:2">Apache Spark</h2>
+  <p class="lead a" style="--d:3">Sistema de procesamiento distribuido de código abierto para macrodatos. Usa memoria caché y consultas optimizadas para análisis rápidos.</p>
+</section>
+
+<!-- 9 · MapReduce vs Spark -->
+<section class="slide" data-title="MapReduce vs Spark" data-section="02 · Apache Spark"
+  data-notes="Miren el punto ámbar: en MapReduce se detiene en el disco después de cada paso. En Spark los pasos ocurren en memoria y termina mucho antes. Por eso Spark es varias veces más rápido, sobre todo en machine learning, que repite pasos muchas veces.">
+  <header class="head">
+    <div class="eyebrow a">02 · Apache Spark</div>
+    <h2 class="h2 a" style="--d:1">MapReduce vs Spark</h2>
+  </header>
+  <div class="lanes grow">
+    <div class="lane card a" style="--d:2">
+      <div class="who"><h3 class="h3">MapReduce</h3><p>Lee y escribe en disco (HDFS) entre cada paso. Esa lectura constante genera latencia.</p></div>
+      <div class="track">
+        <div class="st" style="left:0%">Paso 1</div>
+        <div class="dk dk1" style="left:25%"><svg class="ico" viewBox="0 0 48 48"><ellipse cx="24" cy="12" rx="15" ry="6"/><path d="M9 12v24c0 3.3 6.7 6 15 6s15-2.7 15-6V12"/><path d="M9 24c0 3.3 6.7 6 15 6s15-2.7 15-6"/></svg><small>disco</small></div>
+        <div class="st" style="left:50%">Paso 2</div>
+        <div class="dk dk2" style="left:75%"><svg class="ico" viewBox="0 0 48 48"><ellipse cx="24" cy="12" rx="15" ry="6"/><path d="M9 12v24c0 3.3 6.7 6 15 6s15-2.7 15-6V12"/><path d="M9 24c0 3.3 6.7 6 15 6s15-2.7 15-6"/></svg><small>disco</small></div>
+        <div class="st" style="left:100%">Paso 3</div>
+        <div class="pk mr"></div>
+        <div class="done mr">listo</div>
+      </div>
+    </div>
+    <div class="lane card a" style="--d:3">
+      <div class="who"><h3 class="h3 blue">Spark</h3><p>Procesa en memoria y reutiliza los datos con caché, RDD y DataFrames.</p></div>
+      <div class="track">
+        <div class="ram"><span>MEMORIA RAM</span></div>
+        <div class="st" style="left:0%">Paso 1</div>
+        <div class="st" style="left:50%">Paso 2</div>
+        <div class="st" style="left:100%">Paso 3</div>
+        <div class="pk sp"></div>
+        <div class="done sp">listo</div>
+      </div>
+    </div>
+  </div>
+  <div class="callout a" style="--d:4"><svg class="ico" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><span>Resultado: Spark es <span class="amb">varias veces más rápido</span>, sobre todo en machine learning, donde los mismos datos se recorren una y otra vez.</span></div>
+</section>
+
+<!-- 10 · Spark: Netflix, Uber, Amazon -->
+<section class="slide" data-title="Spark en Netflix, Uber y Amazon" data-section="02 · Apache Spark"
+  data-notes="Un clic por empresa. Netflix: recomendaciones. Uber: tarifas dinámicas y fraude casi en tiempo real. Amazon: lo vende como servicio con EMR.">
+  <header class="head">
+    <div class="eyebrow a">02 · Apache Spark · Casos de uso</div>
+    <h2 class="h2 a" style="--d:1">Spark en el mundo real</h2>
+  </header>
+  <div class="cases grow">
+    <div class="case card" data-step="1">
+      <div class="tag">Streaming</div>
+      <h3 class="h3">Netflix</h3>
+      <p class="body">Analiza lo que ven y buscan los usuarios. Con esos datos alimenta su sistema de recomendaciones y personaliza el catálogo de cada suscriptor.</p>
+      <div class="use"><span>recomendaciones</span><span>personalización</span></div>
+    </div>
+    <div class="case card" data-step="2">
+      <div class="tag">Movilidad</div>
+      <h3 class="h3">Uber</h3>
+      <p class="body">Procesa datos de viajes y demanda casi en tiempo real para calcular tarifas dinámicas y tiempos de llegada. También detecta fraudes.</p>
+      <div class="use"><span>tiempo real</span><span>fraude</span></div>
+    </div>
+    <div class="case card" data-step="3">
+      <div class="tag">Nube</div>
+      <h3 class="h3">Amazon EMR</h3>
+      <p class="body">Ofrece Spark como servicio para analizar grandes volúmenes de datos: procesos ETL, análisis de registros y machine learning, integrado con S3.</p>
+      <div class="use"><span>ETL</span><span>S3</span><span>ML</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 · Spotify, bancos y más -->
+<section class="slide" data-title="Spotify, bancos y otros casos" data-section="02 · Apache Spark"
+  data-notes="Spotify: listas personalizadas a partir de lo que escuchas. Bancos: detectar transacciones sospechosas al instante. Cierren con otros sectores para mostrar que está en todas partes.">
+  <header class="head">
+    <div class="eyebrow a">02 · Apache Spark · Casos de uso</div>
+    <h2 class="h2 a" style="--d:1">Más casos de uso</h2>
+  </header>
+  <div class="cols" style="gap:26px;align-items:stretch">
+    <div class="case card" data-step="1">
+      <div class="tag">Música</div>
+      <h3 class="h3">Spotify</h3>
+      <p class="body">Analiza hábitos de escucha para crear listas personalizadas.</p>
+    </div>
+    <div class="case card" data-step="2">
+      <div class="tag">Finanzas</div>
+      <h3 class="h3">Bancos</h3>
+      <p class="body">Detectan transacciones sospechosas al instante. Su rapidez con grandes volúmenes de datos es la clave.</p>
+    </div>
+  </div>
+  <div class="cases" data-step="3" style="grid-template-columns:repeat(3,1fr)">
+    <div class="card"><div class="tag mono amb" style="font-size:15px;letter-spacing:.16em">OTROS CASOS</div><h3 class="h3" style="margin-top:10px">E-commerce</h3><p class="small" style="margin-top:8px">Recomendaciones y análisis de carritos.</p></div>
+    <div class="card"><div class="tag mono amb" style="font-size:15px;letter-spacing:.16em">OTROS CASOS</div><h3 class="h3" style="margin-top:10px">Telecomunicaciones</h3><p class="small" style="margin-top:8px">Análisis del tráfico de red y fallas.</p></div>
+    <div class="card"><div class="tag mono amb" style="font-size:15px;letter-spacing:.16em">OTROS CASOS</div><h3 class="h3" style="margin-top:10px">Sector salud</h3><p class="small" style="margin-top:8px">Expedientes e imágenes médicas a gran escala.</p></div>
+  </div>
+</section>
+
+<!-- 12 · Sección contenedores -->
+<section class="slide divider" data-title="Contenedores, Kubernetes y autoescalamiento" data-section="03 · Contenedores"
+  data-notes="Ya sabemos procesar datos en paralelo. Ahora: cómo empaquetar y repartir las aplicaciones en la nube.">
+  <div class="big-num a" aria-hidden="true">03</div>
+  <div class="eyebrow a" style="--d:1">Sección 3 de 4</div>
+  <h2 class="mega a" style="--d:2">Contenedores, Kubernetes y autoescalamiento</h2>
+  <p class="lead a" style="--d:3">Empaquetar, repartir y crecer solo cuando hace falta.</p>
+</section>
+
+<!-- 13 · En mi máquina sí funciona -->
+<section class="slide" data-title="En mi máquina sí funciona" data-section="03 · Contenedores"
+  data-notes="El problema clásico. El código es el mismo, pero el servidor tiene otras versiones de Node y MySQL y la app truena. Los contenedores resuelven esto.">
+  <header class="head">
+    <div class="eyebrow a">03 · Contenedores · El problema</div>
+    <h2 class="h2 a" style="--d:1">«En mi máquina sí funciona»</h2>
+  </header>
+  <div class="machines grow">
+    <div class="machine card a" style="--d:2">
+      <div class="top"><h3 class="h3" style="font-size:30px">Tu laptop</h3><span class="status ok"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Funciona</span></div>
+      <div class="code-lines"><i style="width:80%"></i><i style="width:55%"></i><i style="width:68%"></i><i style="width:40%"></i></div>
+      <div class="ver"><span>Node.js</span><b>18.19</b></div>
+      <div class="ver"><span>MySQL</span><b>5.7</b></div>
+    </div>
+    <div class="arrow-flow a" style="--d:3"><span>DEPLOY</span><i></i></div>
+    <div class="machine card" data-step="1">
+      <div class="top"><h3 class="h3" style="font-size:30px">Servidor</h3><span class="status bad"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>No funciona</span></div>
+      <div class="code-lines"><i style="width:80%"></i><i style="width:55%"></i><i style="width:68%"></i><i style="width:40%"></i></div>
+      <div class="ver diff"><span>Node.js</span><b>20.11</b></div>
+      <div class="ver diff"><span>MySQL</span><b>8.0</b></div>
+    </div>
+  </div>
+  <p class="lead" data-step="2">Mismo código, distintas versiones del entorno. La solución: llevar la app <span class="amb">junto con todo lo que necesita</span>.</p>
+</section>
+
+<!-- 14 · ¿Qué es un contenedor? -->
+<section class="slide" data-title="¿Qué es un contenedor?" data-section="03 · Contenedores"
+  data-notes="Un contenedor es una caja con la app, sus librerías y sus versiones exactas. Como los contenedores de barco: no importa qué lleven, se cargan igual en cualquier barco. Docker es la herramienta más usada para crearlos.">
+  <header class="head">
+    <div class="eyebrow a">03 · Contenedores</div>
+    <h2 class="h2 a" style="--d:1">¿Qué es un contenedor?</h2>
+  </header>
+  <div class="cols grow">
+    <div class="nest l1 a" style="--d:2">
+      <div class="lbl">Contenedor</div>
+      <div class="nest l2">
+        <div class="lbl">Tu aplicación</div>
+        <div class="nest l3"><div>Librerías</div><div>Versiones</div><div>Configuración</div></div>
+      </div>
+    </div>
+    <div class="ship-wrap">
+      <div class="ship-float a" style="--d:3"><div class="ship" role="img" aria-label="Contenedor de barco"></div></div>
+      <p class="body a" style="--d:4">Como un contenedor de barco: no importa qué lleve dentro, se carga igual en cualquier barco.</p>
+      <p class="body muted a" style="--d:5">Una imagen de <span class="blue">Docker</span> corre igual en tu laptop, en el servidor o en la nube.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 15 · VM vs contenedores -->
+<section class="slide" data-title="Máquina virtual vs contenedores" data-section="03 · Contenedores"
+  data-notes="Las capas aparecen de abajo hacia arriba. En la VM cada app trae su propio sistema operativo: pesado. Los contenedores comparten el kernel del sistema anfitrión: ligeros, arrancan en segundos y caben muchos más por servidor.">
+  <header class="head">
+    <div class="eyebrow a">03 · Contenedores</div>
+    <h2 class="h2 a" style="--d:1">Máquina virtual vs contenedores</h2>
+  </header>
+  <div class="stacks grow">
+    <div>
+      <div class="stack-title a" style="--d:1">Máquina virtual<small>Un SO completo por app</small></div>
+      <div class="stack">
+        <div class="layer hw a" style="--d:2">Hardware</div>
+        <div class="layer hv a" style="--d:3">Hypervisor</div>
+        <div class="apps vm a" style="--d:4">
+          <div class="vmbox"><div>App A</div><div>Librerías</div><div class="os">SO invitado</div></div>
+          <div class="vmbox"><div>App B</div><div>Librerías</div><div class="os">SO invitado</div></div>
+        </div>
+      </div>
+      <div class="stack-cap" data-step="1"><svg class="ico" style="color:var(--bad)" viewBox="0 0 24 24"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg><span>Gigabytes por VM y minutos para arrancar.</span></div>
+    </div>
+    <div>
+      <div class="stack-title a" style="--d:1">Contenedores<small>Comparten el kernel</small></div>
+      <div class="stack">
+        <div class="layer hw a" style="--d:2">Hardware</div>
+        <div class="layer os a" style="--d:3">SO anfitrión (kernel Linux)</div>
+        <div class="layer dk a" style="--d:4">Docker</div>
+        <div class="apps ct a" style="--d:5">
+          <div class="ctbox"><div>App 1</div><div>Lib</div></div>
+          <div class="ctbox"><div>App 2</div><div>Lib</div></div>
+          <div class="ctbox"><div>App 3</div><div>Lib</div></div>
+          <div class="ctbox"><div>App 4</div><div>Lib</div></div>
+        </div>
+      </div>
+      <div class="stack-cap" data-step="1"><svg class="ico" style="color:var(--ok)" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Megabytes por contenedor y segundos para arrancar.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 · Una app, muchos contenedores -->
+<section class="slide" data-title="Una app, muchos contenedores" data-section="03 · Contenedores"
+  data-notes="Una aplicación real tiene muchas piezas: frontend, API, base de datos. Cada una va en su contenedor con sus versiones exactas, así que ya no chocan entre sí.">
+  <header class="head">
+    <div class="eyebrow a">03 · Contenedores</div>
+    <h2 class="h2 a" style="--d:1">Una app, muchos contenedores</h2>
+  </header>
+  <div class="ring grow a" style="--d:2">
+    <svg class="lines" viewBox="0 0 1392 560" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M696 280 L220 90"/><path d="M696 280 L1172 90"/>
+      <path d="M696 280 L150 280"/><path d="M696 280 L1242 280"/>
+      <path d="M696 280 L220 470"/><path d="M696 280 L1172 470"/>
+    </svg>
+    <div class="hub"><h3 class="h3">Tu aplicación</h3><p>6 contenedores</p></div>
+    <div class="cbox" style="left:15.8%;top:16%"><div class="mini"></div><div><b>Frontend web</b><span>Angular 17</span></div></div>
+    <div class="cbox" style="left:84.2%;top:16%"><div class="mini"></div><div><b>App móvil web</b><span>React 18</span></div></div>
+    <div class="cbox" style="left:10.8%;top:50%"><div class="mini"></div><div><b>API</b><span>Node.js 20</span></div></div>
+    <div class="cbox" style="left:89.2%;top:50%"><div class="mini"></div><div><b>Backend</b><span>PHP 8.2</span></div></div>
+    <div class="cbox" style="left:15.8%;top:84%"><div class="mini"></div><div><b>Base de datos</b><span>MySQL 8.0</span></div></div>
+    <div class="cbox" style="left:84.2%;top:84%"><div class="mini"></div><div><b>Servidor web</b><span>Nginx 1.25</span></div></div>
+  </div>
+</section>
+
+<!-- 17 · Kubernetes -->
+<section class="slide" data-title="Kubernetes" data-section="03 · Contenedores"
+  data-notes="Si tienes cientos de contenedores, alguien tiene que organizarlos: ese es Kubernetes, el capitán del barco. Señalen el contenedor que se pone rojo: Kubernetes lo detecta y lo reinicia solo.">
+  <header class="head">
+    <div class="eyebrow a">03 · Kubernetes</div>
+    <h2 class="h2 a" style="--d:1">Kubernetes: el que organiza todo</h2>
+  </header>
+  <div class="k8s grow">
+    <div class="duties">
+      <div class="duty" data-step="1"><span class="n">01</span><span>Decide en qué servidor (nodo) corre cada contenedor.</span></div>
+      <div class="duty" data-step="2"><span class="n">02</span><span>Si un contenedor falla, lo reinicia solo.</span></div>
+      <div class="duty" data-step="3"><span class="n">03</span><span>Reparte el tráfico entre las copias.</span></div>
+      <div class="duty" data-step="4"><span class="n">04</span><span>Agrega o quita copias según la demanda.</span></div>
+    </div>
+    <div class="cluster a" style="--d:2">
+      <div class="cp">Plano de control<small>kube-scheduler · controladores · API</small></div>
+      <div class="knodes">
+        <div class="knode"><div class="nm">Nodo 1</div><div class="pods"><div class="pod"></div><div class="pod"></div><div class="pod heal"></div><div class="pod"></div><div class="pod"></div></div></div>
+        <div class="knode"><div class="nm">Nodo 2</div><div class="pods"><div class="pod"></div><div class="pod"></div><div class="pod"></div><div class="pod"></div></div></div>
+        <div class="knode"><div class="nm">Nodo 3</div><div class="pods"><div class="pod"></div><div class="pod"></div><div class="pod"></div><div class="pod"></div><div class="pod"></div><div class="pod"></div></div></div>
+      </div>
+      <div class="heal-msg">Contenedor caído: Kubernetes creó uno nuevo</div>
+    </div>
+  </div>
+</section>
+
+<!-- 18 · Autoescalamiento (simulación) -->
+<section class="slide" data-title="Autoescalamiento" data-section="03 · Autoescalamiento" data-anim="autoscale"
+  data-notes="Simulación en vivo. La línea ámbar es el tráfico y la azul la capacidad. Cuando llega el pico (Hot Sale), aparecen más réplicas; cuando baja, se quitan poco a poco. Así solo pagas lo que usas. La fórmula es la que usa Kubernetes (HPA).">
+  <header class="head">
+    <div class="eyebrow a">03 · Autoescalamiento</div>
+    <h2 class="h2 a" style="--d:1">Autoescalamiento en vivo</h2>
+  </header>
+  <div class="as grow">
+    <div class="chart-card card a" style="--d:2">
+      <div class="legend"><span><i style="background:var(--amber)"></i>Tráfico (peticiones/s)</span><span><i style="background:var(--blue)"></i>Capacidad de las réplicas</span></div>
+      <svg class="chart" viewBox="-70 -14 850 360" aria-label="Gráfica en vivo de tráfico contra capacidad">
+        <defs><linearGradient id="ampFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb547" stop-opacity=".32"/><stop offset="1" stop-color="#ffb547" stop-opacity="0"/></linearGradient></defs>
+        <g class="grid">
+          <line x1="0" x2="760" y1="0" y2="0"/><line x1="0" x2="760" y1="106.7" y2="106.7"/><line x1="0" x2="760" y1="213.3" y2="213.3"/><line x1="0" x2="760" y1="320" y2="320"/>
+          <text x="-14" y="5" text-anchor="end">6,000</text><text x="-14" y="112" text-anchor="end">4,000</text><text x="-14" y="218" text-anchor="end">2,000</text><text x="-14" y="325" text-anchor="end">0</text>
+        </g>
+        <path class="tr-area" d=""/>
+        <path class="cap" d=""/>
+        <path class="tr" d=""/>
+      </svg>
+      <div class="event">Pico de tráfico: Hot Sale</div>
+    </div>
+    <div class="as-side a" style="--d:3">
+      <div class="readouts">
+        <div class="ro"><small>Tráfico/s</small><b data-o="t">0</b></div>
+        <div class="ro"><small>Réplicas</small><b data-o="r">0</b></div>
+        <div class="ro"><small>CPU prom.</small><b data-o="c">0%</b></div>
+      </div>
+      <div class="podgrid">
+        <div class="rp">1</div><div class="rp">2</div><div class="rp">3</div><div class="rp">4</div><div class="rp">5</div>
+        <div class="rp">6</div><div class="rp">7</div><div class="rp">8</div><div class="rp">9</div><div class="rp">10</div>
+      </div>
+      <div class="formula"><b>Regla de Kubernetes (HPA):</b><br>deseadas = ceil(actuales × CPU actual / CPU objetivo)<br>Objetivo: 70% de CPU por réplica</div>
+    </div>
+  </div>
+</section>
+
+<!-- 19 · Vertical vs horizontal -->
+<section class="slide" data-title="Vertical vs horizontal" data-section="03 · Autoescalamiento"
+  data-notes="Dos formas de crecer. Vertical: una máquina más grande, fácil pero con límite. Horizontal: más máquinas iguales, casi sin límite; es lo que hace la nube y lo que automatiza Kubernetes.">
+  <header class="head">
+    <div class="eyebrow a">03 · Autoescalamiento</div>
+    <h2 class="h2 a" style="--d:1">Dos formas de crecer</h2>
+  </header>
+  <div class="vh grow">
+    <div class="card a" style="--d:2">
+      <div><h3 class="h3">Vertical</h3><div class="k8s-name">scale up · VPA en Kubernetes</div></div>
+      <div class="visual"><div class="srv v"></div></div>
+      <div class="spec"><span class="s1">2 vCPU · 4 GB RAM</span><span class="s2">16 vCPU · 64 GB RAM</span></div>
+      <ul class="pros">
+        <li class="y"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Una máquina más potente; no cambias tu código.</li>
+        <li class="n"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>Tiene límite y suele requerir reinicio.</li>
+      </ul>
+    </div>
+    <div class="card a" style="--d:3">
+      <div><h3 class="h3 blue">Horizontal</h3><div class="k8s-name">scale out · HPA en Kubernetes</div></div>
+      <div class="visual">
+        <div class="srv h"></div>
+        <div class="srv h n" style="--i:1"></div><div class="srv h n" style="--i:2"></div><div class="srv h n" style="--i:3"></div><div class="srv h n" style="--i:4"></div><div class="srv h n" style="--i:5"></div>
+      </div>
+      <div class="spec"><span>1 → 6 réplicas iguales</span></div>
+      <ul class="pros">
+        <li class="y"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Más máquinas en paralelo: casi sin límite y tolerante a fallos.</li>
+        <li class="n"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>La app debe estar preparada (sin estado y con balanceador).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 20 · Sección microservicios -->
+<section class="slide divider" data-title="Microservicios" data-section="04 · Microservicios"
+  data-notes="Última sección: cómo se diseña una aplicación para aprovechar todo lo anterior.">
+  <div class="big-num a" aria-hidden="true">04</div>
+  <div class="eyebrow a" style="--d:1">Sección 4 de 4</div>
+  <h2 class="mega a" style="--d:2">Microservicios</h2>
+  <p class="lead a" style="--d:3">Piezas pequeñas e independientes que trabajan en paralelo.</p>
+</section>
+
+<!-- 21 · Monolito vs microservicios -->
+<section class="slide" data-title="Monolito vs microservicios" data-section="04 · Microservicios"
+  data-notes="Usen la cocina: en el monolito un solo chef hace todo; si se enferma, no sale ningún platillo. Con microservicios hay una brigada: si falla el de postres, los demás siguen. Miren cómo falla Pagos en los dos lados.">
+  <header class="head">
+    <div class="eyebrow a">04 · Microservicios</div>
+    <h2 class="h2 a" style="--d:1">Monolito vs microservicios</h2>
+  </header>
+  <div class="mm grow">
+    <div class="card a" style="--d:2">
+      <div><h3 class="h3">Monolito</h3><div class="metaphor">Un solo chef hace todo</div></div>
+      <div class="mono-block">
+        <div class="mod">Catálogo</div><div class="mod">Usuarios</div><div class="mod pay">Pagos</div><div class="mod">Envíos</div>
+        <div class="down">Toda la app se cae</div>
+      </div>
+      <p class="verdict">Todo en un solo bloque: <span style="color:var(--bad)">si falla uno, caen todos</span>.</p>
+    </div>
+    <div class="card a" style="--d:3">
+      <div><h3 class="h3 blue">Microservicios</h3><div class="metaphor">Una brigada: cada quien en su estación</div></div>
+      <div class="svcs">
+        <div class="svc">Catálogo</div><div class="svc">Usuarios</div><div class="svc pay">Pagos</div><div class="svc">Envíos</div>
+      </div>
+      <div class="keep">Los demás servicios siguen funcionando</div>
+      <p class="verdict">Piezas independientes que <span class="blue">trabajan en paralelo y escalan por separado</span>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 22 · Microservicios en el mundo real -->
+<section class="slide" data-title="Microservicios en el mundo real" data-section="04 · Microservicios"
+  data-notes="Netflix: si fallan las recomendaciones, tu serie sigue reproduciéndose. Uber: el viernes a las 7 p.m. solo escala la búsqueda de conductores; pagos y calificaciones se quedan igual.">
+  <header class="head">
+    <div class="eyebrow a">04 · Microservicios</div>
+    <h2 class="h2 a" style="--d:1">En el mundo real</h2>
+  </header>
+  <div class="rw grow">
+    <div class="card" data-step="1">
+      <h3 class="h3">Netflix</h3>
+      <p class="body">Cientos de servicios independientes.</p>
+      <div class="chips"><span class="chip">Catálogo</span><span class="chip">Video</span><span class="chip">Pagos</span><span class="chip fail">Recomendaciones</span></div>
+      <div class="player"><div class="row"><span>Tu serie</span><b>reproduciendo</b></div><div class="bar"><i></i></div></div>
+      <p class="small">Si fallan las recomendaciones, sigues viendo tu serie.</p>
+    </div>
+    <div class="card" data-step="2">
+      <h3 class="h3">Uber</h3>
+      <div class="clock">Viernes · 7:00 p.m.</div>
+      <div class="svc-row"><span>Búsqueda</span><div class="reps burst"><i></i><i class="n" style="--i:1"></i><i class="n" style="--i:2"></i><i class="n" style="--i:3"></i><i class="n" style="--i:4"></i><i class="n" style="--i:5"></i></div></div>
+      <div class="svc-row"><span>Cobro</span><div class="reps"><i></i></div></div>
+      <div class="svc-row"><span>Calificaciones</span><div class="reps"><i></i></div></div>
+      <p class="small">Solo escala el servicio de búsqueda de conductores.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 23 · Conclusión -->
+<section class="slide" data-title="Conclusión" data-section="Cierre"
+  data-notes="Repasen una idea por sección en una frase cada una. La cuarta tarjeta es el mensaje central: la nube renta este poder en paralelo y pagas solo lo que usas.">
+  <header class="head">
+    <div class="eyebrow a">Cierre</div>
+    <h2 class="h2 a" style="--d:1">Conclusión</h2>
+  </header>
+  <div class="concl grow">
+    <div class="card" data-step="1"><div class="n">01</div><div><h3 class="h3">MapReduce y Spark</h3><p>Dividen datos gigantes para procesarlos en paralelo. Spark lo hace en memoria, por eso es más rápido.</p></div></div>
+    <div class="card" data-step="2"><div class="n">02</div><div><h3 class="h3">Contenedores y Kubernetes</h3><p>Empaquetan cada app con lo que necesita y la reparten entre muchos servidores.</p></div></div>
+    <div class="card" data-step="3"><div class="n">03</div><div><h3 class="h3">Microservicios</h3><p>Dividen la aplicación en piezas que fallan y escalan por separado.</p></div></div>
+    <div class="card" data-step="4" style="border-color:rgba(255,181,71,.5)"><div class="n">04</div><div><h3 class="h3 amb">La nube</h3><p>Renta todo este poder en paralelo bajo demanda, con autoescalamiento: pagas solo lo que usas.</p></div></div>
+  </div>
+</section>
+
+<!-- 24 · Pregunta -->
+<section class="slide question" data-title="Pregunta para el grupo" data-section="Cierre"
+  data-notes="Dejen que el grupo conteste. Respuestas típicas: WhatsApp, Netflix, Uber, el banco. Conecten cada respuesta con lo que vimos.">
+  <div class="qmark a" aria-hidden="true">?</div>
+  <div class="eyebrow a" style="--d:1">Pregunta para el grupo</div>
+  <p class="q a" style="--d:2">¿Qué aplicación que usas todos los días crees que <span class="amb">colapsaría hoy mismo</span> sin esta arquitectura en la nube?</p>
+</section>
+
+<!-- 25 · Gracias -->
+<section class="slide cover thanks" data-title="Gracias" data-section="Cierre" data-anim="cluster"
+  data-notes="Agradezcan y abran la ronda de preguntas.">
+  <canvas class="bg-canvas" aria-hidden="true"></canvas>
+  <div class="inner">
+    <div class="eyebrow a">Procesamiento paralelo en la nube</div>
+    <h2 class="mega a" style="--d:1">Gracias</h2>
+    <p class="lead a" style="--d:2">¿Preguntas?</p>
+  </div>
+</section>
+
+<div id="wipe" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
+</main>
+</div>
+
+<div id="hud" role="toolbar" aria-label="Controles de la presentación">
+  <span class="sec" id="hud-sec">Inicio</span>
+  <div class="track" aria-hidden="true"><i id="hud-bar"></i></div>
+  <button class="clk" id="hud-clock" title="Tiempo transcurrido. Clic para reiniciar" aria-label="Tiempo transcurrido, clic para reiniciar">00:00</button>
+  <span class="num" id="hud-num">01 / 24</span>
+  <div class="btns">
+    <button id="b-prev" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button id="b-next" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button id="b-anim" aria-label="Animaciones" aria-pressed="true" title="Animaciones (A)"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg></button>
+    <button id="b-notes" aria-label="Notas del presentador" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg></button>
+    <button id="b-index" aria-label="Índice de diapositivas" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
+    <button id="b-fs" aria-label="Pantalla completa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+</div>
+
+<aside id="index" aria-label="Índice">
+  <header><h2>Índice</h2><button id="index-close" aria-label="Cerrar índice"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <ol id="index-list"></ol>
+  <footer><kbd>→</kbd><kbd>Espacio</kbd> avanzar · <kbd>←</kbd> regresar<br><kbd>F</kbd> pantalla completa · <kbd>N</kbd> notas · <kbd>B</kbd> pantalla negra<br><kbd>I</kbd> índice · <kbd>A</kbd> animaciones<br><kbd>Inicio</kbd>/<kbd>Fin</kbd> primera y última</footer>
+</aside>
+<div id="notes" role="note"><b>Notas para quien presenta</b><span id="notes-text"></span></div>
+<div id="black" aria-hidden="true"></div>
+<div id="toast" role="status"></div>
+<script src="JS/script.js"></script>
+</body>
+</html>
